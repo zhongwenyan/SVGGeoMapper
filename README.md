@@ -1,5 +1,13 @@
 # SVGGeoMapper
-Plotting IP addresses from Nginx or Apache log files to SVG map. It uses IP2Location.io API service to lookup for the geoinformation, and then plot to SVG map based on the geoinformation. Free sign up is available through here: https://www.ip2location.io/.
+Plotting IP addresses from Nginx or Apache log files to SVG map. It uses IP2Location.io API service to lookup for the geolocation information, and then plot to SVG map based on the geolocation information with the help of Pygal library. Free sign up is available through here: https://www.ip2location.io/.
+
+## Requirement
+The Pygal library and its world map plugin must be installed before using this script. You can install via terminal by using this command:
+```bash
+pip install pygal
+pip install pygal_maps_world
+```
+
 
 ## Usage
 Just download the script to your choice of directory, and run the script as:
