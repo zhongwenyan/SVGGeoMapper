@@ -21,5 +21,5 @@ svg-geo-mapper.py -k your_api_key -f your_log_file -m your_desired_output_mode -
 | -k, --key |  Your IP2Location.io API key. |
 | -f, --file | Your Nginx or Apache log file.   |
 | -m, --mode | Mode which decide what kind of SVG map or chart to be generated. Options are world, continent, horizontalbar and piechart. Default value is world. |
-| -o, --outputfile | The output filename of the SVG map. |
+| -o, --outputfile | The output filename of the SVG map or chart. |
 | -h, -?, --help | Display the help message. |
