@@ -26,10 +26,29 @@ def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-k', '--key', metavar='Your IP2Location.io API key.')
     parser.add_argument('-f', '--file', metavar='Your Nginx/Apache log file.')
-    parser.add_argument('-m', '--mode', metavar='Type of map to be generated.')
+    parser.add_argument('-m', '--mode', metavar='Render mode for the SVG file. Can be a map or a chart. See help for more information.')
     parser.add_argument('-o', '--outputfile', metavar='Your SVG filename.')
 
     return parser
+
+def print_usage():
+    print(
+"svg-geo-mapper.py -k [IP2Location.io API key] -f [Nginx/Apache log file] -m [Render mode] -o [Your SVG output filename]\n"
+"\n"
+"   -k, --key\n"
+"   IP2Location.io API key. Free API key is available through sign up in their website.\n"
+"\n"
+"   -f, --file\n"
+"   Your Nginx or Apache log file.\n"
+"\n"
+"   -m, --mode\n"
+"   Render mode for the SVG file. Available values are world, continent, horizontalbar and piechart. Default is world.\n"
+"\n"
+"   -o, --outputfile\n"
+"   Your SVG output filename.\n"
+"\n"
+"   -h, -?, --help\n"
+"   Display the help.\n")
 
 def findkeys(value):
     for dict__ in pygal_supported_countries:
@@ -86,27 +105,42 @@ def generate_svg_map(filename, apikey, mode, output_filename):
                             continents[continentname] = [1, continentname]
                     else:
                         entries_notsupported_count = entries_notsupported_count + 1
+                elif mode == "horizontalbar" or mode == "piechart":
+                    if result["country_code"] in countries:
+                        countries[result["country_code"]] = [countries[result["country_code"]][0] + 1, result["country_name"]]
+                    else:
+                        countries[result["country_code"]] = [1, result["country_name"]]
                 else:
                     print("Invalid mode detected.")
                     return
         
         if entries_notsupported_count > 0:
-            print("Note: %i entries are not supported due to origin country did not supported by pygal." % entries_notsupported_count)
+            print("Note: %i entries are not supported due to origin country did not supported by Pygal." % entries_notsupported_count)
         
         # Plot SVG map
         print("Generating the SVG map..." + "\n")
         if mode == "world":
             worldmap_chart = pygal.maps.world.World()
-            worldmap_chart.title = "Distribution of IP addresses in log files by country"
+            worldmap_chart.title = "Distribution of IP addresses in " + filename + " by country"
             for country in countries:
                 worldmap_chart.add(countries[country][1], {country: countries[country][0]})
             worldmap_chart.render_to_file(output_filename)
         elif mode == "continent":
             supra = pygal.maps.world.SupranationalWorld()
+            supra.title = "Distribution of IP addresses in " + filename + " by country"
             for continent in continents:
                 supra.add(continents[continent][1], [(continents[continent][1].lower().replace(' ', '_'), continents[continent][0])])
             supra.render_to_file(output_filename)
-        print("Generated the SVG map..." + "\n")
+        elif mode == "horizontalbar" or mode == "piechart":
+            if mode == "horizontalbar":
+                chart = pygal.HorizontalBar()
+            elif mode == "piechart":
+                chart = pygal.Pie()
+            chart.title = "Distribution of IP addresses in " + filename + " by country"
+            for country in countries:
+                chart.add(countries[country][1], countries[country][0])
+            chart.render_to_file(output_filename)
+        print("Generated the SVG map for " + filename + ".\n")
         
     except FileNotFoundError:
         print("Log file not found.")
@@ -115,10 +149,10 @@ if __name__ == '__main__':
     is_help = False
     # print(sys.argv)
     if len(sys.argv) >= 2:
-        # for index, arg in enumerate(sys.argv):
-            # if arg in ['--help', '-h', '-?']:
-                # print_usage()
-                # is_help = True
+        for index, arg in enumerate(sys.argv):
+            if arg in ['--help', '-h', '-?']:
+                print_usage()
+                is_help = True
         if is_help is False:
             parser = create_parser()
             args = parser.parse_args(sys.argv[1:])
